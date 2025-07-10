@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>数字消消乐 - 手机版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 10px;
+            color: #e6e6e6;
+            touch-action: manipulation;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 600px;
+            gap: 15px;
+        }
+        
+        .game-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #f8f8f8;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(15, 36px);
+            grid-template-rows: repeat(15, 36px);
+            gap: 2px;
+            background: rgba(30, 40, 60, 0.8);
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #4a5568;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        
+        .tile {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .tile.front {
+            background: linear-gradient(145deg, #3498db, #1a75bc);
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        
+        .tile.back {
+            background: linear-gradient(145deg, #4a5568, #2d3748);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tile.back::after {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+        }
+        
+        .tile.highlight {
+            box-shadow: 0 0 0 3px #f39c12, 0 0 15px #f39c12;
+            z-index: 10;
+        }
+        
+        .tile.valid-drop {
+            box-shadow: 0 0 0 3px #2ecc71, 0 0 15px #2ecc71;
+        }
+        
+        .tile.invalid-drop {
+            box-shadow: 0 0 0 3px #e74c3c, 0 0 15px #e74c3c;
+        }
+        
+        .drag-range-indicator {
+            position: absolute;
+            background: rgba(243, 156, 18, 0.2);
+            border: 2px dashed #f39c12;
+            border-radius: 6px;
+            pointer-events: none;
+            z-index: 5;
+            display: none;
+        }
+        
+        .stats-container {
+            background: rgba(25, 35, 55, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid #4a5568;
+        }
+        
+        .stats-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #f39c12;
+            font-size: 1.1rem;
+        }
+        
+        .instructions {
+            margin-top: 15px;
+            background: rgba(40, 50, 70, 0.6);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .instructions h3 {
+            color: #3498db;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .instructions ul {
+            padding-left: 18px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: linear-gradient(to right, #3498db, #1a75bc);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .dragging-element {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 22px;
+            color: white;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.7);
+        }
+        
+        .victory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        
+        .victory-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .victory-message {
+            font-size: 2.2rem;
+            color: #f39c12;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(243, 156, 18, 0.8);
+        }
+        
+        .moves-count {
+            font-size: 1.5rem;
+            color: #3498db;
+            margin-bottom: 30px;
+        }
+        
+        .initialization-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(40, 50, 70, 0.6);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 400px) {
+            .game-board {
+                grid-template-columns: repeat(15, 32px);
+                grid-template-rows: repeat(15, 32px);
+                padding: 10px;
+            }
+            
+            .tile {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+            
+            .game-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="game-title">数字消消乐</h1>
+        
+        <div class="game-area">
+            <div class="game-board" id="gameBoard">
+                <div class="drag-range-indicator" id="dragRangeIndicator"></div>
+            </div>
+            <div class="initialization-info">
+                <p>中间4个格子中，两个为背面，两个显示和为10的数字</p>
+                <p>拖动规则：只能在以自己为中心的3×3范围内拖动</p>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <h2 class="stats-title">游戏状态</h2>
+            
+            <div class="stats-row">
+                <span>移动步数:</span>
+                <span class="stat-value" id="movesCount">0</span>
+            </div>
+            
+            <div class="stats-row">
+                <span>已翻转格子:</span>
+                <span class="stat-value" id="flippedCount">2</span>
+            </div>
+            
+            <div class="stats-row">
+                <span>剩余格子:</span>
+                <span class="stat-value" id="remainingCount">223</span>
+            </div>
+            
+            <div class="instructions">
+                <h3>游戏规则</h3>
+                <ul>
+                    <li>初始状态：中间4个格子中，两个为背面，两个显示和为10的数字</li>
+                    <li>点击并拖拽一个数字到另一个数字上</li>
+                    <li><strong>只能在以自己为中心的3×3范围内拖动</strong></li>
+                    <li>如果两个数字之和为10，目标格子周围3×3的格子会被翻转</li>
+                    <li>翻转后的格子显示1-9的随机数字</li>
+                    <li>将所有格子翻转为正面即获胜</li>
+                </ul>
+            </div>
+            
+            <button class="btn" id="resetBtn">重置游戏</button>
+        </div>
+    </div>
+    
+    <div class="victory-overlay" id="victoryOverlay">
+        <div class="victory-message">恭喜获胜！</div>
+        <div class="moves-count">移动步数: <span id="victoryMoves">0</span></div>
+        <button class="btn" id="playAgainBtn">再玩一次</button>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 游戏常量
+            const BOARD_SIZE = 15;
+            const CENTER = Math.floor(BOARD_SIZE / 2);
+            const CELL_SIZE = 36;
+            const GAP = 2;
+            
+            // 可能的数字对（和为10）
+            const NUMBER_PAIRS = [
+                [1, 9],
+                [2, 8],
+                [3, 7],
+                [4, 6],
+                [5, 5]
+            ];
+            
+            // 游戏状态
+            let gameState = {
+                tiles: [],
+                moves: 0,
+                flippedTiles: 2, // 初始有两个正面格子
+                dragging: null,
+                draggingElement: null,
+                dragRangeIndicator: null,
+                validDropTiles: [],
+                gameOver: false,
+                touchStartX: 0,
+                touchStartY: 0
+            };
+            
+            // DOM 元素
+            const gameBoard = document.getElementById('gameBoard');
+            const dragRangeIndicator = document.getElementById('dragRangeIndicator');
+            const movesCount = document.getElementById('movesCount');
+            const flippedCount = document.getElementById('flippedCount');
+            const remainingCount = document.getElementById('remainingCount');
+            const resetBtn = document.getElementById('resetBtn');
+            const victoryOverlay = document.getElementById('victoryOverlay');
+            const victoryMoves = document.getElementById('victoryMoves');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            
+            // 初始化游戏
+            function initGame() {
+                gameBoard.innerHTML = '<div class="drag-range-indicator" id="dragRangeIndicator"></div>';
+                gameState.tiles = [];
+                gameState.moves = 0;
+                gameState.flippedTiles = 2;
+                gameState.dragging = null;
+                gameState.draggingElement = null;
+                gameState.dragRangeIndicator = document.getElementById('dragRangeIndicator');
+                gameState.validDropTiles = [];
+                gameState.gameOver = false;
+                
+                updateStats();
+                victoryOverlay.classList.remove('active');
+                
+                // 创建网格
+                for (let row = 0; row < BOARD_SIZE; row++) {
+                    for (let col = 0; col < BOARD_SIZE; col++) {
+                        const tile = document.createElement('div');
+                        tile.className = 'tile back';
+                        tile.dataset.row = row;
+                        tile.dataset.col = col;
+                        
+                        gameBoard.appendChild(tile);
+                        gameState.tiles.push({
+                            element: tile,
+                            row,
+                            col,
+                            isFront: false,
+                            number: null
+                        });
+                    }
+                }
+                
+                // 初始化中间4个格子
+                initCenterTiles();
+                
+                // 添加事件监听器
+                setupEventListeners();
+            }
+            
+            // 初始化中间4个格子
+            function initCenterTiles() {
+                // 中间4个格子的位置
+                const centerPositions = [
+                    [CENTER - 1, CENTER - 1],
+                    [CENTER - 1, CENTER],
+                    [CENTER, CENTER - 1],
+                    [CENTER, CENTER]
+                ];
+                
+                // 随机选择两个位置作为正面（显示数字）
+                const shuffledPositions = [...centerPositions].sort(() => Math.random() - 0.5);
+                const frontPositions = shuffledPositions.slice(0, 2);
+                const backPositions = shuffledPositions.slice(2);
+                
+                // 随机选择一组数字对
+                const pair = NUMBER_PAIRS[Math.floor(Math.random() * NUMBER_PAIRS.length)];
+                
+                // 设置正面格子
+                frontPositions.forEach((pos, index) => {
+                    const [row, col] = pos;
+                    const tile = getTile(row, col);
+                    if (tile) {
+                        tile.element.classList.remove('back');
+                        tile.element.classList.add('front');
+                        tile.element.textContent = pair[index];
+                        tile.isFront = true;
+                        tile.number = pair[index];
+                    }
+                });
+                
+                // 设置背面格子
+                backPositions.forEach(pos => {
+                    const [row, col] = pos;
+                    const tile = getTile(row, col);
+                    if (tile) {
+                        tile.element.classList.add('back');
+                        tile.element.classList.remove('front');
+                        tile.element.textContent = '';
+                        tile.isFront = false;
+                        tile.number = null;
+                    }
+                });
+            }
+            
+            // 获取指定位置的格子
+            function getTile(row, col) {
+                return gameState.tiles.find(t => t.row === row && t.col === col);
+            }
+            
+            // 显示拖动范围指示器
+            function showDragRange(row, col) {
+                const startX = 12 + col * (CELL_SIZE + GAP) - (CELL_SIZE + GAP);
+                const startY = 12 + row * (CELL_SIZE + GAP) - (CELL_SIZE + GAP);
+                const width = (CELL_SIZE + GAP) * 3 - GAP;
+                const height = (CELL_SIZE + GAP) * 3 - GAP;
+                
+                gameState.dragRangeIndicator.style.left = `${startX}px`;
+                gameState.dragRangeIndicator.style.top = `${startY}px`;
+                gameState.dragRangeIndicator.style.width = `${width}px`;
+                gameState.dragRangeIndicator.style.height = `${height}px`;
+                gameState.dragRangeIndicator.style.display = 'block';
+            }
+            
+            // 隐藏拖动范围指示器
+            function hideDragRange() {
+                gameState.dragRangeIndicator.style.display = 'none';
+            }
+            
+            // 获取可拖放的有效格子
+            function getValidDropTiles(row, col) {
+                const validTiles = [];
+                
+                for (let r = row - 1; r <= row + 1; r++) {
+                    for (let c = col - 1; c <= col + 1; c++) {
+                        // 检查边界
+                        if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+                            // 排除自己
+                            if (!(r === row && c === col)) {
+                                const tile = getTile(r, c);
+                                if (tile && tile.isFront) {
+                                    validTiles.push(tile);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return validTiles;
+            }
+            
+            // 高亮显示可拖放的格子
+            function highlightValidDropTiles(validTiles) {
+                // 重置所有高亮
+                gameState.tiles.forEach(tile => {
+                    tile.element.classList.remove('valid-drop');
+                    tile.element.classList.remove('invalid-drop');
+                });
+                
+                // 高亮有效拖放区域
+                validTiles.forEach(tile => {
+                    tile.element.classList.add('valid-drop');
+                });
+            }
+            
+            // 开始拖拽
+            function startDrag(e) {
+                let tile, clientX, clientY;
+                
+                if (e.type === 'touchstart') {
+                    // 触摸事件
+                    e.preventDefault();
+                    tile = document.elementFromPoint(
+                        e.touches[0].clientX,
+                        e.touches[0].clientY
+                    );
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                    gameState.touchStartX = clientX;
+                    gameState.touchStartY = clientY;
+                } else {
+                    // 鼠标事件
+                    tile = e.target;
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                
+                if (!tile || !tile.classList || !tile.classList.contains('front') || gameState.gameOver) return;
+                
+                const row = parseInt(tile.dataset.row);
+                const col = parseInt(tile.dataset.col);
+                
+                gameState.dragging = {
+                    element: tile,
+                    row,
+                    col,
+                    number: parseInt(tile.textContent)
+                };
+                
+                // 显示拖动范围
+                showDragRange(row, col);
+                
+                // 获取可拖放的有效格子
+                gameState.validDropTiles = getValidDropTiles(row, col);
+                
+                // 高亮显示可拖放的格子
+                highlightValidDropTiles(gameState.validDropTiles);
+                
+                // 创建拖拽元素
+                if (gameState.draggingElement) {
+                    document.body.removeChild(gameState.draggingElement);
+                }
+                
+                gameState.draggingElement = document.createElement('div');
+                gameState.draggingElement.className = 'dragging-element';
+                gameState.draggingElement.textContent = gameState.dragging.number;
+                document.body.appendChild(gameState.draggingElement);
+                
+                updateDragPosition({ clientX, clientY });
+                
+                // 添加事件监听器
+                if ('ontouchstart' in window) {
+                    document.addEventListener('touchmove', handleTouchMove);
+                    document.addEventListener('touchend', endDrag);
+                } else {
+                    document.addEventListener('mousemove', updateDragPosition);
+                    document.addEventListener('mouseup', endDrag);
+                }
+            }
+            
+            // 处理触摸移动
+            function handleTouchMove(e) {
+                e.preventDefault();
+                if (!gameState.draggingElement) return;
+                
+                const touch = e.touches[0];
+                updateDragPosition({
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+            }
+            
+            // 更新拖拽位置
+            function updateDragPosition(e) {
+                if (!gameState.draggingElement) return;
+                
+                gameState.draggingElement.style.left = (e.clientX - 25) + 'px';
+                gameState.draggingElement.style.top = (e.clientY - 25) + 'px';
+                
+                // 检查当前悬停的格子是否在有效范围内
+                const targetElement = document.elementFromPoint(e.clientX, e.clientY);
+                if (targetElement && targetElement.classList && targetElement.classList.contains('tile')) {
+                    const targetTile = getTile(
+                        parseInt(targetElement.dataset.row),
+                        parseInt(targetElement.dataset.col)
+                    );
+                    
+                    if (!targetTile) return;
+                    
+                    // 检查是否是有效拖放目标
+                    const isValid = gameState.validDropTiles.some(t => 
+                        t.row === targetTile.row && t.col === targetTile.col);
+                    
+                    // 更新高亮状态
+                    gameState.validDropTiles.forEach(tile => {
+                        tile.element.classList.remove('valid-drop');
+                        tile.element.classList.remove('invalid-drop');
+                        if (tile.row === targetTile.row && tile.col === targetTile.col) {
+                            tile.element.classList.add(isValid ? 'valid-drop' : 'invalid-drop');
+                        } else {
+                            tile.element.classList.add('valid-drop');
+                        }
+                    });
+                }
+            }
+            
+            // 结束拖拽
+            function endDrag(e) {
+                if (!gameState.dragging) return;
+                
+                // 移除事件监听器
+                if ('ontouchstart' in window) {
+                    document.removeEventListener('touchmove', handleTouchMove);
+                    document.removeEventListener('touchend', endDrag);
+                } else {
+                    document.removeEventListener('mousemove', updateDragPosition);
+                    document.removeEventListener('mouseup', endDrag);
+                }
+                
+                // 移除拖拽元素
+                if (gameState.draggingElement) {
+                    document.body.removeChild(gameState.draggingElement);
+                    gameState.draggingElement = null;
+                }
+                
+                // 隐藏拖动范围指示器
+                hideDragRange();
+                
+                // 重置高亮
+                gameState.tiles.forEach(tile => {
+                    tile.element.classList.remove('valid-drop');
+                    tile.element.classList.remove('invalid-drop');
+                });
+                
+                // 获取目标格子
+                let targetElement, clientX, clientY;
+                
+                if (e.type === 'touchend') {
+                    // 触摸事件
+                    clientX = gameState.touchStartX;
+                    clientY = gameState.touchStartY;
+                    targetElement = document.elementFromPoint(clientX, clientY);
+                } else {
+                    // 鼠标事件
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                    targetElement = document.elementFromPoint(clientX, clientY);
+                }
+                
+                if (!targetElement || !targetElement.classList || !targetElement.classList.contains('front')) {
+                    gameState.dragging = null;
+                    return;
+                }
+                
+                const targetRow = parseInt(targetElement.dataset.row);
+                const targetCol = parseInt(targetElement.dataset.col);
+                
+                // 检查是否同一个格子
+                if (targetRow === gameState.dragging.row && targetCol === gameState.dragging.col) {
+                    gameState.dragging = null;
+                    return;
+                }
+                
+                // 检查是否在有效范围内
+                const isValidDrop = gameState.validDropTiles.some(tile => 
+                    tile.row === targetRow && tile.col === targetCol);
+                
+                if (!isValidDrop) {
+                    gameState.dragging = null;
+                    return;
+                }
+                
+                // 检查数字和是否为10
+                const targetNumber = parseInt(targetElement.textContent);
+                if (gameState.dragging.number + targetNumber === 10) {
+                    // 有效匹配
+                    gameState.moves++;
+                    flipTilesAround(targetRow, targetCol);
+                    updateStats();
+                    
+                    // 检查游戏是否胜利
+                    if (gameState.flippedTiles === BOARD_SIZE * BOARD_SIZE) {
+                        victoryMoves.textContent = gameState.moves;
+                        victoryOverlay.classList.add('active');
+                        gameState.gameOver = true;
+                    }
+                }
+                
+                gameState.dragging = null;
+            }
+            
+            // 翻转目标格子周围的3x3区域
+            function flipTilesAround(row, col) {
+                for (let r = row - 1; r <= row + 1; r++) {
+                    for (let c = col - 1; c <= col + 1; c++) {
+                        // 检查边界
+                        if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+                            const tile = getTile(r, c);
+                            
+                            // 只翻转背面的格子
+                            if (tile && !tile.isFront) {
+                                tile.element.classList.remove('back');
+                                tile.element.classList.add('front');
+                                tile.element.textContent = Math.floor(Math.random() * 9) + 1;
+                                tile.isFront = true;
+                                tile.number = parseInt(tile.element.textContent);
+                                gameState.flippedTiles++;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // 鼠标悬停效果
+            function handleMouseEnter(e) {
+                const tile = e.target;
+                if (tile.classList.contains('front') && !gameState.gameOver) {
+                    tile.classList.add('highlight');
+                }
+            }
+            
+            function handleMouseLeave(e) {
+                const tile = e.target;
+                tile.classList.remove('highlight');
+                tile.classList.remove('valid-drop');
+                tile.classList.remove('invalid-drop');
+            }
+            
+            // 更新游戏统计信息
+            function updateStats() {
+                movesCount.textContent = gameState.moves;
+                flippedCount.textContent = gameState.flippedTiles;
+                remainingCount.textContent = BOARD_SIZE * BOARD_SIZE - gameState.flippedTiles;
+            }
+            
+            // 设置事件监听器
+            function setupEventListeners() {
+                // 为所有格子添加事件监听器
+                gameState.tiles.forEach(tile => {
+                    tile.element.addEventListener('mousedown', startDrag);
+                    tile.element.addEventListener('touchstart', startDrag, { passive: false });
+                    tile.element.addEventListener('mouseenter', handleMouseEnter);
+                    tile.element.addEventListener('mouseleave', handleMouseLeave);
+                });
+                
+                // 重置按钮
+                resetBtn.addEventListener('click', initGame);
+                playAgainBtn.addEventListener('click', initGame);
+            }
+            
+            // 初始化游戏
+            initGame();
+        });
+    </script>
+</body>
+</html>
