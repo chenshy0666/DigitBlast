@@ -9,72 +9,73 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
         
         body {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
             min-height: 100vh;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
-            padding: 10px;
             color: #e6e6e6;
             touch-action: manipulation;
+            overflow-x: hidden;
+            padding: 10px;
         }
         
-        .container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 600px;
-            gap: 15px;
+        .header {
+            text-align: center;
+            padding: 10px 0;
         }
         
         .game-title {
             font-size: 1.8rem;
-            margin-bottom: 10px;
-            text-align: center;
+            margin: 5px 0;
             color: #f8f8f8;
             text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
         }
         
-        .game-area {
+        .game-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
         }
         
         .game-board {
             display: grid;
-            grid-template-columns: repeat(15, 36px);
-            grid-template-rows: repeat(15, 36px);
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
             gap: 2px;
             background: rgba(30, 40, 60, 0.8);
-            padding: 12px;
+            padding: 10px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             border: 2px solid #4a5568;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1/1;
             position: relative;
-            margin-bottom: 10px;
         }
         
         .tile {
-            width: 36px;
-            height: 36px;
+            width: 100%;
+            height: 100%;
+            min-height: 35px;
             border-radius: 6px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 18px;
-            cursor: pointer;
+            font-size: 1.2rem;
             transition: all 0.2s ease;
             position: relative;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none;
         }
         
         .tile.front {
@@ -91,8 +92,8 @@
         .tile.back::after {
             content: "";
             position: absolute;
-            width: 18px;
-            height: 18px;
+            width: 40%;
+            height: 40%;
             background: rgba(255, 255, 255, 0.15);
             border-radius: 50%;
         }
@@ -125,13 +126,15 @@
             border-radius: 10px;
             padding: 15px;
             width: 100%;
+            max-width: 400px;
+            margin: 15px auto;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             border: 1px solid #4a5568;
         }
         
         .stats-title {
             font-size: 1.3rem;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-align: center;
             color: #3498db;
             border-bottom: 2px solid #3498db;
@@ -141,27 +144,27 @@
         .stats-row {
             display: flex;
             justify-content: space-between;
-            margin: 10px 0;
+            margin: 8px 0;
+            font-size: 0.95rem;
         }
         
         .stat-value {
             font-weight: bold;
             color: #f39c12;
-            font-size: 1.1rem;
         }
         
         .instructions {
-            margin-top: 15px;
+            margin-top: 10px;
             background: rgba(40, 50, 70, 0.6);
             padding: 12px;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         
         .instructions h3 {
             color: #3498db;
             margin-bottom: 8px;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         
         .instructions ul {
@@ -169,7 +172,7 @@
         }
         
         .instructions li {
-            margin: 8px 0;
+            margin: 6px 0;
             line-height: 1.4;
         }
         
@@ -190,7 +193,8 @@
         }
         
         .btn:active {
-            transform: translateY(1px);
+            transform: scale(0.98);
+            opacity: 0.9;
         }
         
         .dragging-element {
@@ -203,11 +207,12 @@
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            font-size: 22px;
+            font-size: 1.5rem;
             color: white;
             pointer-events: none;
             z-index: 100;
             box-shadow: 0 0 20px rgba(243, 156, 18, 0.7);
+            transform: translate(-50%, -50%);
         }
         
         .victory-overlay {
@@ -234,7 +239,7 @@
         }
         
         .victory-message {
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: #f39c12;
             margin-bottom: 20px;
             text-align: center;
@@ -242,51 +247,49 @@
         }
         
         .moves-count {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #3498db;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         
         .initialization-info {
-            margin-top: 10px;
+            margin: 10px 0;
             padding: 10px;
             background: rgba(40, 50, 70, 0.6);
             border-radius: 8px;
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         
         @media (max-width: 400px) {
-            .game-board {
-                grid-template-columns: repeat(15, 32px);
-                grid-template-rows: repeat(15, 32px);
-                padding: 10px;
+            .game-title {
+                font-size: 1.5rem;
             }
             
             .tile {
-                width: 32px;
-                height: 32px;
-                font-size: 16px;
+                font-size: 1rem;
             }
             
-            .game-title {
-                font-size: 1.5rem;
+            .dragging-element {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="header">
         <h1 class="game-title">数字消消乐</h1>
-        
-        <div class="game-area">
-            <div class="game-board" id="gameBoard">
-                <div class="drag-range-indicator" id="dragRangeIndicator"></div>
-            </div>
-            <div class="initialization-info">
-                <p>中间4个格子中，两个为背面，两个显示和为10的数字</p>
-                <p>拖动规则：只能在以自己为中心的3×3范围内拖动</p>
-            </div>
+    </div>
+    
+    <div class="game-container">
+        <div class="game-board" id="gameBoard">
+            <div class="drag-range-indicator" id="dragRangeIndicator"></div>
+        </div>
+        <div class="initialization-info">
+            <p>中间4个格子中，两个为背面，两个显示和为10的数字</p>
+            <p>拖动规则：只能在以自己为中心的3×3范围内拖动</p>
         </div>
         
         <div class="stats-container">
@@ -304,14 +307,14 @@
             
             <div class="stats-row">
                 <span>剩余格子:</span>
-                <span class="stat-value" id="remainingCount">223</span>
+                <span class="stat-value" id="remainingCount">98</span>
             </div>
             
             <div class="instructions">
                 <h3>游戏规则</h3>
                 <ul>
                     <li>初始状态：中间4个格子中，两个为背面，两个显示和为10的数字</li>
-                    <li>点击并拖拽一个数字到另一个数字上</li>
+                    <li>长按并拖拽一个数字到另一个数字上</li>
                     <li><strong>只能在以自己为中心的3×3范围内拖动</strong></li>
                     <li>如果两个数字之和为10，目标格子周围3×3的格子会被翻转</li>
                     <li>翻转后的格子显示1-9的随机数字</li>
@@ -332,10 +335,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // 游戏常量
-            const BOARD_SIZE = 15;
+            const BOARD_SIZE = 10;
             const CENTER = Math.floor(BOARD_SIZE / 2);
-            const CELL_SIZE = 36;
-            const GAP = 2;
             
             // 可能的数字对（和为10）
             const NUMBER_PAIRS = [
@@ -356,8 +357,8 @@
                 dragRangeIndicator: null,
                 validDropTiles: [],
                 gameOver: false,
-                touchStartX: 0,
-                touchStartY: 0
+                touchStartPos: null,
+                currentTouchPos: null
             };
             
             // DOM 元素
@@ -464,15 +465,18 @@
             
             // 显示拖动范围指示器
             function showDragRange(row, col) {
-                const startX = 12 + col * (CELL_SIZE + GAP) - (CELL_SIZE + GAP);
-                const startY = 12 + row * (CELL_SIZE + GAP) - (CELL_SIZE + GAP);
-                const width = (CELL_SIZE + GAP) * 3 - GAP;
-                const height = (CELL_SIZE + GAP) * 3 - GAP;
+                const tile = getTile(row, col).element;
+                const rect = tile.getBoundingClientRect();
+                const boardRect = gameBoard.getBoundingClientRect();
                 
-                gameState.dragRangeIndicator.style.left = `${startX}px`;
-                gameState.dragRangeIndicator.style.top = `${startY}px`;
-                gameState.dragRangeIndicator.style.width = `${width}px`;
-                gameState.dragRangeIndicator.style.height = `${height}px`;
+                const rangeSize = rect.width * 3;
+                const left = rect.left - boardRect.left - rect.width;
+                const top = rect.top - boardRect.top - rect.width;
+                
+                gameState.dragRangeIndicator.style.width = `${rangeSize}px`;
+                gameState.dragRangeIndicator.style.height = `${rangeSize}px`;
+                gameState.dragRangeIndicator.style.left = `${left}px`;
+                gameState.dragRangeIndicator.style.top = `${top}px`;
                 gameState.dragRangeIndicator.style.display = 'block';
             }
             
@@ -517,29 +521,25 @@
                 });
             }
             
-            // 开始拖拽
+            // 开始拖拽（触摸或鼠标）
             function startDrag(e) {
-                let tile, clientX, clientY;
+                if (gameState.gameOver) return;
                 
-                if (e.type === 'touchstart') {
-                    // 触摸事件
+                // 获取目标格子
+                const tile = e.type.includes('touch') ? 
+                    document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY) : 
+                    e.target;
+                
+                if (!tile || !tile.classList || !tile.classList.contains('front')) return;
+                
+                // 阻止默认行为防止页面滚动
+                if (e.type.includes('touch')) {
                     e.preventDefault();
-                    tile = document.elementFromPoint(
-                        e.touches[0].clientX,
-                        e.touches[0].clientY
-                    );
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                    gameState.touchStartX = clientX;
-                    gameState.touchStartY = clientY;
-                } else {
-                    // 鼠标事件
-                    tile = e.target;
-                    clientX = e.clientX;
-                    clientY = e.clientY;
+                    gameState.touchStartPos = {
+                        x: e.touches[0].clientX,
+                        y: e.touches[0].clientY
+                    };
                 }
-                
-                if (!tile || !tile.classList || !tile.classList.contains('front') || gameState.gameOver) return;
                 
                 const row = parseInt(tile.dataset.row);
                 const col = parseInt(tile.dataset.col);
@@ -570,62 +570,79 @@
                 gameState.draggingElement.textContent = gameState.dragging.number;
                 document.body.appendChild(gameState.draggingElement);
                 
-                updateDragPosition({ clientX, clientY });
+                // 更新拖拽元素位置
+                updateDragPosition(e);
                 
                 // 添加事件监听器
-                if ('ontouchstart' in window) {
-                    document.addEventListener('touchmove', handleTouchMove);
+                if (e.type.includes('touch')) {
+                    document.addEventListener('touchmove', handleDragMove, { passive: false });
                     document.addEventListener('touchend', endDrag);
                 } else {
-                    document.addEventListener('mousemove', updateDragPosition);
+                    document.addEventListener('mousemove', handleDragMove);
                     document.addEventListener('mouseup', endDrag);
                 }
             }
             
-            // 处理触摸移动
-            function handleTouchMove(e) {
-                e.preventDefault();
-                if (!gameState.draggingElement) return;
+            // 处理拖拽移动
+            function handleDragMove(e) {
+                if (!gameState.dragging) return;
                 
-                const touch = e.touches[0];
-                updateDragPosition({
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
+                // 阻止触摸事件的默认行为防止页面滚动
+                if (e.type.includes('touch')) {
+                    e.preventDefault();
+                    gameState.currentTouchPos = {
+                        x: e.touches[0].clientX,
+                        y: e.touches[0].clientY
+                    };
+                }
+                
+                updateDragPosition(e);
+                updateDropTargetHighlight(e);
             }
             
-            // 更新拖拽位置
+            // 更新拖拽元素位置
             function updateDragPosition(e) {
                 if (!gameState.draggingElement) return;
                 
-                gameState.draggingElement.style.left = (e.clientX - 25) + 'px';
-                gameState.draggingElement.style.top = (e.clientY - 25) + 'px';
+                const pos = e.type.includes('touch') ? 
+                    { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } : 
+                    e;
+                
+                gameState.draggingElement.style.left = `${pos.clientX}px`;
+                gameState.draggingElement.style.top = `${pos.clientY}px`;
+            }
+            
+            // 更新拖放目标高亮
+            function updateDropTargetHighlight(e) {
+                const pos = e.type.includes('touch') ? 
+                    { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY } : 
+                    e;
                 
                 // 检查当前悬停的格子是否在有效范围内
-                const targetElement = document.elementFromPoint(e.clientX, e.clientY);
-                if (targetElement && targetElement.classList && targetElement.classList.contains('tile')) {
-                    const targetTile = getTile(
-                        parseInt(targetElement.dataset.row),
-                        parseInt(targetElement.dataset.col)
-                    );
-                    
-                    if (!targetTile) return;
-                    
-                    // 检查是否是有效拖放目标
-                    const isValid = gameState.validDropTiles.some(t => 
-                        t.row === targetTile.row && t.col === targetTile.col);
-                    
-                    // 更新高亮状态
-                    gameState.validDropTiles.forEach(tile => {
-                        tile.element.classList.remove('valid-drop');
-                        tile.element.classList.remove('invalid-drop');
-                        if (tile.row === targetTile.row && tile.col === targetTile.col) {
-                            tile.element.classList.add(isValid ? 'valid-drop' : 'invalid-drop');
-                        } else {
-                            tile.element.classList.add('valid-drop');
-                        }
-                    });
-                }
+                const targetElement = document.elementFromPoint(pos.clientX, pos.clientY);
+                if (!targetElement || !targetElement.classList || !targetElement.classList.contains('tile')) return;
+                
+                const targetTile = getTile(
+                    parseInt(targetElement.dataset.row),
+                    parseInt(targetElement.dataset.col)
+                );
+                
+                if (!targetTile) return;
+                
+                // 检查是否是有效拖放目标
+                const isValid = gameState.validDropTiles.some(t => 
+                    t.row === targetTile.row && t.col === targetTile.col);
+                
+                // 更新高亮状态
+                gameState.validDropTiles.forEach(tile => {
+                    tile.element.classList.remove('valid-drop');
+                    tile.element.classList.remove('invalid-drop');
+                    if (tile.row === targetTile.row && tile.col === targetTile.col) {
+                        tile.element.classList.add(isValid ? 'valid-drop' : 'invalid-drop');
+                    } else {
+                        tile.element.classList.add('valid-drop');
+                    }
+                });
             }
             
             // 结束拖拽
@@ -633,11 +650,11 @@
                 if (!gameState.dragging) return;
                 
                 // 移除事件监听器
-                if ('ontouchstart' in window) {
-                    document.removeEventListener('touchmove', handleTouchMove);
+                if (e.type.includes('touch')) {
+                    document.removeEventListener('touchmove', handleDragMove);
                     document.removeEventListener('touchend', endDrag);
                 } else {
-                    document.removeEventListener('mousemove', updateDragPosition);
+                    document.removeEventListener('mousemove', handleDragMove);
                     document.removeEventListener('mouseup', endDrag);
                 }
                 
@@ -657,18 +674,14 @@
                 });
                 
                 // 获取目标格子
-                let targetElement, clientX, clientY;
-                
-                if (e.type === 'touchend') {
-                    // 触摸事件
-                    clientX = gameState.touchStartX;
-                    clientY = gameState.touchStartY;
-                    targetElement = document.elementFromPoint(clientX, clientY);
+                let targetElement;
+                if (e.type.includes('touch')) {
+                    // 对于触摸事件，使用最后一次触摸位置
+                    targetElement = gameState.currentTouchPos ? 
+                        document.elementFromPoint(gameState.currentTouchPos.x, gameState.currentTouchPos.y) : 
+                        document.elementFromPoint(gameState.touchStartPos.x, gameState.touchStartPos.y);
                 } else {
-                    // 鼠标事件
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                    targetElement = document.elementFromPoint(clientX, clientY);
+                    targetElement = document.elementFromPoint(e.clientX, e.clientY);
                 }
                 
                 if (!targetElement || !targetElement.classList || !targetElement.classList.contains('front')) {
@@ -711,6 +724,8 @@
                 }
                 
                 gameState.dragging = null;
+                gameState.touchStartPos = null;
+                gameState.currentTouchPos = null;
             }
             
             // 翻转目标格子周围的3x3区域
@@ -735,21 +750,6 @@
                 }
             }
             
-            // 鼠标悬停效果
-            function handleMouseEnter(e) {
-                const tile = e.target;
-                if (tile.classList.contains('front') && !gameState.gameOver) {
-                    tile.classList.add('highlight');
-                }
-            }
-            
-            function handleMouseLeave(e) {
-                const tile = e.target;
-                tile.classList.remove('highlight');
-                tile.classList.remove('valid-drop');
-                tile.classList.remove('invalid-drop');
-            }
-            
             // 更新游戏统计信息
             function updateStats() {
                 movesCount.textContent = gameState.moves;
@@ -763,8 +763,6 @@
                 gameState.tiles.forEach(tile => {
                     tile.element.addEventListener('mousedown', startDrag);
                     tile.element.addEventListener('touchstart', startDrag, { passive: false });
-                    tile.element.addEventListener('mouseenter', handleMouseEnter);
-                    tile.element.addEventListener('mouseleave', handleMouseLeave);
                 });
                 
                 // 重置按钮
