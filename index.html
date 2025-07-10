@@ -197,6 +197,23 @@
             opacity: 0.9;
         }
         
+        .btn-magic {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-magic .icon {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .btn-magic:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         .dragging-element {
             position: absolute;
             width: 50px;
@@ -261,6 +278,66 @@
             font-size: 0.8rem;
         }
         
+        .magic-wand-container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+        
+        .magic-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 500;
+        }
+        
+        .magic-spark {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #9b59b6;
+            box-shadow: 0 0 10px 5px rgba(155, 89, 182, 0.8);
+            animation: sparkle 1s ease-out forwards;
+        }
+        
+        @keyframes sparkle {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        
+        .magic-wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            border: 2px solid #9b59b6;
+            box-shadow: 0 0 15px rgba(155, 89, 182, 0.8);
+            opacity: 0;
+            animation: wave 0.8s ease-out forwards;
+        }
+        
+        @keyframes wave {
+            0% {
+                transform: scale(0.9);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1.1);
+                opacity: 0;
+            }
+        }
+        
         @media (max-width: 400px) {
             .game-title {
                 font-size: 1.5rem;
@@ -310,15 +387,27 @@
                 <span class="stat-value" id="remainingCount">98</span>
             </div>
             
+            <div class="stats-row">
+                <span>魔法棒:</span>
+                <span class="stat-value" id="magicWandCount">3</span>
+            </div>
+            
+            <div class="magic-wand-container">
+                <button class="btn btn-magic" id="magicWandBtn">
+                    <span class="icon">✨</span>
+                    <span>刷新数字魔法棒</span>
+                </button>
+            </div>
+            
             <div class="instructions">
                 <h3>游戏规则</h3>
                 <ul>
-                    <li>初始状态：中间4个格子中，两个为背面，两个显示和为10的数字</li>
                     <li>长按并拖拽一个数字到另一个数字上</li>
-                    <li><strong>只能在以自己为中心的3×3范围内拖动</strong></li>
                     <li>如果两个数字之和为10，目标格子周围3×3的格子会被翻转</li>
+                    <li>只能在以自己为中心的3×3范围内拖动</li>
                     <li>翻转后的格子显示1-9的随机数字</li>
                     <li>将所有格子翻转为正面即获胜</li>
+                    <li><strong>魔法棒功能：刷新所有正面数字（初始3次）</strong></li>
                 </ul>
             </div>
             
@@ -352,6 +441,7 @@
                 tiles: [],
                 moves: 0,
                 flippedTiles: 2, // 初始有两个正面格子
+                magicWandCount: 3, // 魔法棒初始数量
                 dragging: null,
                 draggingElement: null,
                 dragRangeIndicator: null,
@@ -367,6 +457,8 @@
             const movesCount = document.getElementById('movesCount');
             const flippedCount = document.getElementById('flippedCount');
             const remainingCount = document.getElementById('remainingCount');
+            const magicWandCount = document.getElementById('magicWandCount');
+            const magicWandBtn = document.getElementById('magicWandBtn');
             const resetBtn = document.getElementById('resetBtn');
             const victoryOverlay = document.getElementById('victoryOverlay');
             const victoryMoves = document.getElementById('victoryMoves');
@@ -378,6 +470,7 @@
                 gameState.tiles = [];
                 gameState.moves = 0;
                 gameState.flippedTiles = 2;
+                gameState.magicWandCount = 3; // 重置魔法棒数量
                 gameState.dragging = null;
                 gameState.draggingElement = null;
                 gameState.dragRangeIndicator = document.getElementById('dragRangeIndicator');
@@ -750,11 +843,91 @@
                 }
             }
             
+            // 使用魔法棒刷新所有正面数字
+            function useMagicWand() {
+                if (gameState.magicWandCount <= 0 || gameState.gameOver) return;
+                
+                // 减少魔法棒数量
+                gameState.magicWandCount--;
+                updateStats();
+                
+                // 创建魔法效果
+                createMagicEffect();
+                
+                // 刷新所有正面数字
+                gameState.tiles.forEach(tile => {
+                    if (tile.isFront) {
+                        // 生成新的随机数字 (1-9)
+                        const newNumber = Math.floor(Math.random() * 9) + 1;
+                        tile.number = newNumber;
+                        tile.element.textContent = newNumber;
+                        
+                        // 添加短暂的动画效果
+                        tile.element.style.transition = 'transform 0.3s ease, background 0.3s ease';
+                        tile.element.style.transform = 'scale(1.1)';
+                        tile.element.style.background = 'linear-gradient(145deg, #9b59b6, #8e44ad)';
+                        
+                        setTimeout(() => {
+                            tile.element.style.transform = 'scale(1)';
+                            tile.element.style.background = 'linear-gradient(145deg, #3498db, #1a75bc)';
+                        }, 300);
+                    }
+                });
+                
+                // 如果魔法棒用完，禁用按钮
+                if (gameState.magicWandCount <= 0) {
+                    magicWandBtn.disabled = true;
+                }
+            }
+            
+            // 创建魔法效果动画
+            function createMagicEffect() {
+                const animationContainer = document.createElement('div');
+                animationContainer.className = 'magic-animation';
+                gameBoard.appendChild(animationContainer);
+                
+                // 创建魔法波纹
+                const wave = document.createElement('div');
+                wave.className = 'magic-wave';
+                animationContainer.appendChild(wave);
+                
+                // 创建魔法粒子
+                for (let i = 0; i < 30; i++) {
+                    const spark = document.createElement('div');
+                    spark.className = 'magic-spark';
+                    
+                    // 随机位置
+                    const left = Math.random() * 100;
+                    const top = Math.random() * 100;
+                    spark.style.left = `${left}%`;
+                    spark.style.top = `${top}%`;
+                    
+                    // 随机大小
+                    const size = Math.random() * 10 + 5;
+                    spark.style.width = `${size}px`;
+                    spark.style.height = `${size}px`;
+                    
+                    // 随机动画延迟
+                    spark.style.animationDelay = `${Math.random() * 0.5}s`;
+                    
+                    animationContainer.appendChild(spark);
+                }
+                
+                // 移除动画容器
+                setTimeout(() => {
+                    gameBoard.removeChild(animationContainer);
+                }, 1000);
+            }
+            
             // 更新游戏统计信息
             function updateStats() {
                 movesCount.textContent = gameState.moves;
                 flippedCount.textContent = gameState.flippedTiles;
                 remainingCount.textContent = BOARD_SIZE * BOARD_SIZE - gameState.flippedTiles;
+                magicWandCount.textContent = gameState.magicWandCount;
+                
+                // 更新魔法棒按钮状态
+                magicWandBtn.disabled = gameState.magicWandCount <= 0 || gameState.gameOver;
             }
             
             // 设置事件监听器
@@ -768,6 +941,9 @@
                 // 重置按钮
                 resetBtn.addEventListener('click', initGame);
                 playAgainBtn.addEventListener('click', initGame);
+                
+                // 魔法棒按钮
+                magicWandBtn.addEventListener('click', useMagicWand);
             }
             
             // 初始化游戏
